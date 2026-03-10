@@ -21,7 +21,7 @@ from prepare import evaluate, get_dataloaders, get_device
 # =============================================================================
 
 MODEL = "efficientnet_b0"           # efficientnet_b0 | efficientnet_b1 | mobilenet_v3_small | mobilenet_v3_large | resnet18 | resnet34
-LEARNING_RATE = 0.001               # 0.0001 — 0.01
+LEARNING_RATE = 0.0003              # 0.0001 — 0.01
 BATCH_SIZE = 16                     # 8 | 16 | 32
 EPOCHS = 30                         # será limitado pelo budget de tempo
 IMAGE_SIZE = 224                    # 224 | 256 | 320
