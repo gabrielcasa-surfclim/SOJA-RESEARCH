@@ -22,14 +22,14 @@ from prepare import evaluate, get_dataloaders, get_device
 
 MODEL = "efficientnet_b0"           # efficientnet_b0 | efficientnet_b1 | mobilenet_v3_small | mobilenet_v3_large | resnet18 | resnet34
 LEARNING_RATE = 0.0003              # 0.0001 — 0.01
-BATCH_SIZE = 16                     # 8 | 16 | 32
-EPOCHS = 30                         # será limitado pelo budget de tempo
+BATCH_SIZE = 32                     # 8 | 16 | 32
+EPOCHS = 3                          # será limitado pelo budget de tempo
 IMAGE_SIZE = 224                    # 224 | 256 | 320
 DROPOUT = 0.2                       # 0.0 — 0.5
-OPTIMIZER = "adam"                  # adam | adamw | sgd
+OPTIMIZER = "adamw"                # adam | adamw | sgd
 SCHEDULER = "cosine"               # cosine | step | onecycle | none
 FREEZE_BACKBONE = False             # True = só treina classifier head | False = fine-tune completo
-AUGMENTATION_LEVEL = "medium"       # none | light | medium | heavy
+AUGMENTATION_LEVEL = "light"        # none | light | medium | heavy
 WEIGHT_DECAY = 1e-4                 # 0 — 0.01
 LABEL_SMOOTHING = 0.1              # 0.0 — 0.2
 

@@ -28,7 +28,7 @@ CREATE TABLE disease_images (
     disease_id UUID NOT NULL REFERENCES diseases(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
     thumbnail_url TEXT,
-    source VARCHAR(50) CHECK (source IN ('plantvillage', 'kaggle', 'field', 'upload')),
+    source VARCHAR(50) CHECK (source IN ('plantvillage', 'kaggle', 'field', 'upload', 'asdid', 'digipathos', 'doencasdeplantas', 'srin')),
     metadata JSONB DEFAULT '{}',
     validated BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT now()

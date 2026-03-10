@@ -43,11 +43,28 @@ FOLDER_TO_CLASS = {
     "digipathos_mosaico_crop": "Mosaico",
     "digipathos_saudavel": "Saudável",
     "healthy": "Saudável",
+    # doencasdeplantas.com.br
+    "doencasdeplantas_ferrugem_asiatica": "Ferrugem",
+    "doencasdeplantas_oidio": "Oídio",
+    "doencasdeplantas_mancha_alvo": "Mancha-alvo",
+    "doencasdeplantas_mancha_olho_de_ra": "Cercospora",
+    "doencasdeplantas_antracnose": "Antracnose",
+    "doencasdeplantas_virose_do_mosaico_comum": "Mosaico",
+    "doencasdeplantas_virose_do_mosaico_rugoso": "Mosaico",
+    "doencasdeplantas_cercosporiose": "Cercospora",
+    # soybeanresearchinfo.com (SRIN)
+    "srin_anthracnose": "Antracnose",
+    "srin_cercospora_leaf_blight": "Cercospora",
+    "srin_frogeye_leaf_spot": "Frogeye",
+    "srin_powdery_mildew": "Oídio",
+    "srin_viruses": "Mosaico",
 }
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "images")
 
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
+
+MIN_SAMPLES = 50  # Classes com menos imagens que isso são ignoradas no treino
 
 
 # =============================================================================
@@ -83,6 +100,15 @@ class SoybeanDiseaseDataset(Dataset):
                 ext = os.path.splitext(fname)[1].lower()
                 if ext in VALID_EXTENSIONS:
                     class_samples[class_name].append(os.path.join(folder_path, fname))
+
+        # Filtra classes com poucas imagens
+        skipped = {cls: len(paths) for cls, paths in class_samples.items() if len(paths) < MIN_SAMPLES}
+        if skipped:
+            print(f"Classes ignoradas (< {MIN_SAMPLES} imagens):")
+            for cls, count in sorted(skipped.items()):
+                print(f"  {cls}: {count} imagens (ignorada)")
+            for cls in skipped:
+                del class_samples[cls]
 
         # Ordena classes e atribui índices
         self.classes = sorted(class_samples.keys())

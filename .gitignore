@@ -1,8 +1,10 @@
 data/images/
+data/tmp/
 *.pth
 node_modules/
 .DS_Store
 __pycache__/
+.env
 best_model.pth
 results.tsv
 best_accuracy.txt
