@@ -28,7 +28,7 @@ IMAGE_SIZE = 224                    # 224 | 256 | 320
 DROPOUT = 0.2                       # 0.0 — 0.5
 OPTIMIZER = "adam"                  # adam | adamw | sgd
 SCHEDULER = "cosine"               # cosine | step | onecycle | none
-FREEZE_BACKBONE = True              # True = só treina classifier head | False = fine-tune completo
+FREEZE_BACKBONE = False             # True = só treina classifier head | False = fine-tune completo
 AUGMENTATION_LEVEL = "medium"       # none | light | medium | heavy
 WEIGHT_DECAY = 1e-4                 # 0 — 0.01
 LABEL_SMOOTHING = 0.1              # 0.0 — 0.2
