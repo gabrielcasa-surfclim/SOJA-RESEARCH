@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create vite@latest . -- --template react-ts 2>&1 | tail -5)",
+      "WebFetch(domain:api.semanticscholar.org)",
+      "Bash(curl -s -I -H \"Origin: http://localhost:5173\" \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=soybean&retmax=1&retmode=json\" 2>&1 | grep -i \"access-control\\\\|cors\\\\|HTTP\")",
+      "Bash(curl -s -I -H \"Origin: http://localhost:5173\" \"https://api.crossref.org/works?query=soybean&rows=1\" 2>&1 | grep -i \"access-control\\\\|cors\\\\|HTTP\")",
+      "Bash(curl -s -I -H \"Origin: http://localhost:5173\" \"https://api.semanticscholar.org/graph/v1/paper/search?query=soybean&limit=1&fields=title\" 2>&1 | grep -i \"access-control\\\\|cors\\\\|HTTP\")",
+      "Bash(curl -s -D - -H \"Origin: http://localhost:5173\" \"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=soybean&retmax=1&retmode=json\" 2>&1 | head -15)",
+      "Bash(curl -s \"https://api.crossref.org/works?query=soybean+rust&rows=1\" 2>&1 | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['message']['items'][0]['title']\\)\")",
+      "Bash(node -e \"\nasync function test\\(\\) {\n  // PubMed\n  try {\n    const r1 = await fetch\\('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=soybean+rust&retmax=3&retmode=json'\\);\n    const d1 = await r1.json\\(\\);\n    console.log\\('PubMed IDs:', d1.esearchresult.idlist\\);\n    \n    const ids = d1.esearchresult.idlist.join\\(','\\);\n    const r1b = await fetch\\('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=' + ids + '&retmode=json'\\);\n    const d1b = await r1b.json\\(\\);\n    const titles = d1.esearchresult.idlist.map\\(id => d1b.result[id]?.title?.substring\\(0, 60\\)\\);\n    console.log\\('PubMed titles:', titles\\);\n  } catch\\(e\\) { console.error\\('PubMed error:', e.message\\); }\n\n  // CrossRef\n  try {\n    const r2 = await fetch\\('https://api.crossref.org/works?query=soybean+rust+detection&rows=2'\\);\n    const d2 = await r2.json\\(\\);\n    console.log\\('CrossRef:', d2.message.items.map\\(i => i.title?.[0]?.substring\\(0, 60\\)\\)\\);\n  } catch\\(e\\) { console.error\\('CrossRef error:', e.message\\); }\n\n  // Semantic Scholar  \n  try {\n    const r3 = await fetch\\('https://api.semanticscholar.org/graph/v1/paper/search?query=soybean+rust&limit=2&fields=title,abstract,authors,year,citationCount,externalIds,url'\\);\n    console.log\\('SemanticScholar status:', r3.status\\);\n    if \\(r3.ok\\) {\n      const d3 = await r3.json\\(\\);\n      console.log\\('SemanticScholar:', d3.data?.map\\(p => p.title?.substring\\(0, 60\\)\\)\\);\n    }\n  } catch\\(e\\) { console.error\\('SemanticScholar error:', e.message\\); }\n}\ntest\\(\\);\n\" 2>&1)",
+      "Bash(pkill -f \"vite\" 2>/dev/null; echo \"killed\")",
+      "Bash(npm run build 2>&1)",
+      "Bash(npm run dev 2>&1)",
+      "Bash(node -c scripts/night-crawler.js)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl -s \"https://api.github.com/repos/spMohanty/PlantVillage-Dataset/contents/raw/color\" | grep -i \"soy\\\\|soja\")",
+      "Bash(curl -s \"https://api.github.com/repos/spMohanty/PlantVillage-Dataset/contents/raw/color\" | python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(d['name']\\) for d in data if d['type']=='dir']\" | head -50)",
+      "Bash(curl -s \"https://api.github.com/repos/spMohanty/PlantVillage-Dataset/contents/raw/color/Soybean___healthy\" | python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\(f'Total files: {len\\(data\\)}'\\); [print\\(d['name'], d['download_url'][:80]\\) for d in data[:3]]\")",
+      "Bash(curl -sI \"https://api.github.com/repos/spMohanty/PlantVillage-Dataset/contents/raw/color/Soybean___healthy\" | grep -i link)",
+      "Bash(curl -s \"https://api.github.com/repos/spMohanty/PlantVillage-Dataset/git/trees/master?recursive=1\" | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nsoy = [t for t in data['tree'] if 'Soybean' in t.get\\('path',''\\)]\nprint\\(f'Total soybean entries: {len\\(soy\\)}'\\)\n# check if there are folders beyond healthy\nfolders = set\\(\\)\nfor t in soy:\n    parts = t['path'].split\\('/'\\)\n    for p in parts:\n        if 'Soybean' in p:\n            folders.add\\(p\\)\nprint\\('Folders:', folders\\)\n\" 2>/dev/null || echo \"Tree too large\")",
+      "Bash(node scripts/download-images.js)",
+      "WebSearch",
+      "WebFetch(domain:data.mendeley.com)",
+      "WebFetch(domain:datadryad.org)",
+      "WebFetch(domain:zenodo.org)",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "Bash(curl -sL \"https://zenodo.org/api/records/7304859\" | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\nfiles = data.get\\('files', []\\)\nfor f in files:\n    size_mb = f['size'] / \\(1024*1024\\)\n    print\\(f'{f[\\\\\"key\\\\\"]:40s} {size_mb:8.1f} MB  {f[\\\\\"links\\\\\"][\\\\\"self\\\\\"]}'\\)\nprint\\(f'\\\\nTotal files: {len\\(files\\)}'\\)\ntotal = sum\\(f['size'] for f in files\\)\nprint\\(f'Total size: {total/\\(1024**3\\):.1f} GB'\\)\n\")",
+      "WebFetch(domain:www.digipathos-rep.cnptia.embrapa.br)",
+      "WebFetch(domain:doi.org)",
+      "WebFetch(domain:www.redape.dados.embrapa.br)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:digipathos.readthedocs.io)",
+      "Bash(cd /Users/gabrielcasa/projetos/soja-research/training && python -c \"import torch; print\\(f'PyTorch {torch.__version__}'\\); print\\(f'MPS disponível: {torch.backends.mps.is_available\\(\\)}'\\); import torchvision; print\\(f'TorchVision {torchvision.__version__}'\\); from sklearn.metrics import accuracy_score; print\\('sklearn OK'\\)\")",
+      "Bash(which python3:*)",
+      "Bash(git init:*)",
+      "Bash(cd /Users/gabrielcasa/projetos/soja-research/training && python3 train.py 2>&1)"
+    ]
+  }
+}
