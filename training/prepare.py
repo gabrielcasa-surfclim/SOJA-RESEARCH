@@ -31,6 +31,7 @@ from torchvision import transforms
 # =============================================================================
 
 FOLDER_TO_CLASS = {
+    # Digipathos (EMBRAPA)
     "digipathos_ferrugem": "Ferrugem",
     "digipathos_ferrugem_crop": "Ferrugem",
     "soybean_rust": "Ferrugem",
@@ -38,8 +39,10 @@ FOLDER_TO_CLASS = {
     "digipathos_oidio_crop": "Oídio",
     "digipathos_mancha_alvo": "Mancha-alvo",
     "digipathos_mancha_alvo_crop": "Mancha-alvo",
-    "digipathos_cercospora": "Cercospora",
-    "digipathos_cercospora_crop": "Cercospora",
+    "target_spot": "Mancha-alvo",                      # ASDID — era "Target Spot"
+    "digipathos_cercospora": "Olho-de-rã",             # Cercospora sojina = Frogeye
+    "digipathos_cercospora_crop": "Olho-de-rã",
+    "frogeye": "Olho-de-rã",                           # ASDID — era "Frogeye"
     "digipathos_antracnose": "Antracnose",
     "digipathos_mosaico": "Mosaico",
     "digipathos_mosaico_crop": "Mosaico",
@@ -49,15 +52,15 @@ FOLDER_TO_CLASS = {
     "doencasdeplantas_ferrugem_asiatica": "Ferrugem",
     "doencasdeplantas_oidio": "Oídio",
     "doencasdeplantas_mancha_alvo": "Mancha-alvo",
-    "doencasdeplantas_mancha_olho_de_ra": "Cercospora",
+    "doencasdeplantas_mancha_olho_de_ra": "Olho-de-rã",
     "doencasdeplantas_antracnose": "Antracnose",
     "doencasdeplantas_virose_do_mosaico_comum": "Mosaico",
     "doencasdeplantas_virose_do_mosaico_rugoso": "Mosaico",
-    "doencasdeplantas_cercosporiose": "Cercospora",
+    "doencasdeplantas_cercosporiose": "Olho-de-rã",
     # soybeanresearchinfo.com (SRIN)
     "srin_anthracnose": "Antracnose",
-    "srin_cercospora_leaf_blight": "Cercospora",
-    "srin_frogeye_leaf_spot": "Frogeye",
+    "srin_cercospora_leaf_blight": "Olho-de-rã",
+    "srin_frogeye_leaf_spot": "Olho-de-rã",
     "srin_powdery_mildew": "Oídio",
     "srin_viruses": "Mosaico",
 }
