@@ -172,9 +172,18 @@ def split_group_source(remaining):
 # Estratégia C: Group por pasta (folder)
 # ─────────────────────────────────────────────────────────────────────
 
+def _folder_group_key(folder_name: str) -> str:
+    """Agrupa pastas _crop e non-_crop no mesmo grupo.
+    Ex: digipathos_oidio e digipathos_oidio_crop → 'digipathos_oidio'"""
+    if folder_name.endswith("_crop"):
+        return folder_name[:-5]  # remove '_crop'
+    return folder_name
+
+
 def split_group_folder(remaining):
-    """Para classes multi-pasta, reserva pastas inteiras como val (~20%).
-    Para classes mono-pasta, faz random 20%."""
+    """Agrupa pastas _crop/non-_crop como par único, divide 80/20 DENTRO
+    de cada grupo. Pastas de fontes diferentes ficam em grupos separados
+    e vão inteiras pro val (isolamento de fonte)."""
     rng = np.random.RandomState(SEED)
 
     by_class = defaultdict(list)
@@ -185,43 +194,43 @@ def split_group_folder(remaining):
     for cls in sorted(by_class.keys()):
         recs = by_class[cls]
 
-        # Agrupa por pasta
-        by_folder = defaultdict(list)
+        # Agrupa por grupo de pasta (crop + non-crop juntos)
+        by_group = defaultdict(list)
         for rec in recs:
-            by_folder[rec[3]].append(rec)
+            group = _folder_group_key(rec[3])
+            by_group[group].append(rec)
 
-        folders = sorted(by_folder.keys())
+        groups = sorted(by_group.keys())
 
-        if len(folders) > 1:
-            # Multi-pasta: seleciona pastas pro val até atingir ~20%
-            total = len(recs)
-            target_val = int(total * VAL_RATIO)
+        if len(groups) > 1:
+            # Multi-grupo: fontes diferentes vão inteiras pro val (~20%)
+            # Dentro de cada grupo de mesma fonte, divide 80/20 por imagem
+            group_sources = {}
+            for g in groups:
+                group_sources[g] = set(r[2] for r in by_group[g])
 
-            # Ordena pastas do menor pro maior
-            folder_sizes = [(f, len(by_folder[f])) for f in folders]
-            rng.shuffle(folder_sizes)  # shuffle antes de ordenar pra desempate aleatório
-            folder_sizes.sort(key=lambda x: x[1])
+            # Identifica a fonte principal (mais imagens)
+            source_counts = defaultdict(int)
+            for g in groups:
+                for src in group_sources[g]:
+                    source_counts[src] += len([r for r in by_group[g] if r[2] == src])
+            main_source = max(source_counts, key=lambda s: source_counts[s])
 
-            val_folders = set()
-            val_count = 0
-            for f, size in folder_sizes:
-                if val_count + size <= target_val * 1.5:  # margem de 50%
-                    val_folders.add(f)
-                    val_count += size
-                    if val_count >= target_val:
-                        break
+            for g in groups:
+                g_recs = by_group[g]
+                g_sources = group_sources[g]
 
-            # Se não conseguiu nenhuma pasta, pega a menor
-            if not val_folders:
-                val_folders.add(folder_sizes[0][0])
-
-            for f in folders:
-                if f in val_folders:
-                    val.extend(by_folder[f])
+                if g_sources != {main_source} and len(groups) > 2:
+                    # Grupo de fonte diferente → inteiro pro val
+                    val.extend(g_recs)
                 else:
-                    train.extend(by_folder[f])
+                    # Mesma fonte → divide 80/20 dentro do grupo
+                    rng.shuffle(g_recs)
+                    n_val = max(1, int(len(g_recs) * VAL_RATIO))
+                    val.extend(g_recs[:n_val])
+                    train.extend(g_recs[n_val:])
         else:
-            # Mono-pasta: random 20%
+            # Mono-grupo: random 20%
             rng.shuffle(recs)
             n_val = max(1, int(len(recs) * VAL_RATIO))
             val.extend(recs[:n_val])
