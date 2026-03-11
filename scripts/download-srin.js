@@ -162,9 +162,17 @@ function extractImageUrls(html) {
     }
   }
 
-  // Filter out tiny images (icons, logos) — keep only images >= 500px wide
+  // Filter out tiny images (icons, logos, template thumbnails)
   return [...bestUrls.values()]
-    .filter((v) => v.width >= 500)
+    .filter((v) => {
+      if (v.width < 500) return false;
+      // Exclude WordPress template images that appear on every page
+      const fname = v.url.toLowerCase();
+      if (fname.includes('80x80')) return false;
+      if (fname.includes('silent-yield-stealer')) return false;
+      if (fname.includes('aspect-ratio-16-9')) return false;
+      return true;
+    })
     .map((v) => v.url);
 }
 

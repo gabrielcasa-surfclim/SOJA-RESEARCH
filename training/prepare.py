@@ -5,6 +5,8 @@ ARQUIVO FIXO — O agente autônomo NÃO deve modificar este arquivo.
 Qualquer mudança aqui invalida a comparação entre experimentos.
 """
 
+import csv
+import json
 import os
 import re
 from collections import defaultdict
@@ -61,6 +63,7 @@ FOLDER_TO_CLASS = {
 }
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "images")
+SPLITS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "splits")
 
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
 
@@ -204,6 +207,50 @@ def get_val_transform(image_size: int = 224) -> transforms.Compose:
 # =============================================================================
 
 
+def _load_split_csv(split_name: str) -> List[Tuple[str, str]]:
+    """Carrega um CSV de split e retorna lista de (path, class)."""
+    csv_path = os.path.join(SPLITS_DIR, f"{split_name}.csv")
+    records = []
+    with open(csv_path, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            records.append((row["path"], row["class"]))
+    return records
+
+
+def _load_class_weights() -> Dict[str, float]:
+    """Carrega class_weights.json do diretório de splits."""
+    weights_path = os.path.join(SPLITS_DIR, "class_weights.json")
+    with open(weights_path, "r") as f:
+        return json.load(f)
+
+
+def _splits_available() -> bool:
+    """Verifica se os CSVs de split existem."""
+    return all(
+        os.path.exists(os.path.join(SPLITS_DIR, f))
+        for f in ["train.csv", "val.csv", "class_weights.json"]
+    )
+
+
+class _ListDataset(Dataset):
+    """Dataset a partir de lista de (path, label_idx)."""
+
+    def __init__(self, samples: List[Tuple[str, int]], transform=None):
+        self.samples = samples
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        path, label = self.samples[idx]
+        image = Image.open(path).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
+        return image, label
+
+
 def get_dataloaders(
     image_size: int = 224,
     batch_size: int = 16,
@@ -213,45 +260,107 @@ def get_dataloaders(
     seed: int = 42,
 ) -> Tuple[DataLoader, DataLoader, List[str]]:
     """
-    Carrega dataset, divide 80/20 estratificado, retorna (train_loader, val_loader, class_names).
+    Carrega dataset e retorna (train_loader, val_loader, class_names).
+
+    Se data/splits/ existir (gerado por create_splits.py), usa os splits CSV
+    com separação por fonte. Caso contrário, faz split aleatório estratificado.
     """
-    # Carrega dataset sem transform (vamos aplicar depois via subsets)
+    train_transform = get_train_transform(image_size, augmentation_level)
+    val_transform = get_val_transform(image_size)
+
+    if _splits_available():
+        return _get_dataloaders_from_splits(
+            train_transform, val_transform, batch_size, num_workers
+        )
+
+    # Fallback: split aleatório estratificado (comportamento antigo)
     full_dataset = SoybeanDiseaseDataset(data_dir=DATA_DIR, transform=None)
 
     if len(full_dataset) == 0:
         raise RuntimeError("Dataset vazio! Verifique se há imagens em data/images/")
 
-    # Split estratificado
     labels = [label for _, label in full_dataset.samples]
     train_indices, val_indices = _stratified_split(labels, val_ratio, seed)
 
-    print(f"\nSplit: {len(train_indices)} treino, {len(val_indices)} validação")
-
-    # Datasets com transforms diferentes
-    train_transform = get_train_transform(image_size, augmentation_level)
-    val_transform = get_val_transform(image_size)
+    print(f"\nSplit: {len(train_indices)} treino, {len(val_indices)} validação (random)")
 
     train_dataset = _TransformSubset(full_dataset, train_indices, train_transform)
     val_dataset = _TransformSubset(full_dataset, val_indices, val_transform)
 
     train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=True,
+        train_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=num_workers, pin_memory=True,
         persistent_workers=num_workers > 0,
     )
     val_loader = DataLoader(
-        val_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True,
+        val_dataset, batch_size=batch_size, shuffle=False,
+        num_workers=num_workers, pin_memory=True,
         persistent_workers=num_workers > 0,
     )
 
     return train_loader, val_loader, full_dataset.classes
+
+
+def _get_dataloaders_from_splits(
+    train_transform, val_transform, batch_size: int, num_workers: int,
+) -> Tuple[DataLoader, DataLoader, List[str]]:
+    """Carrega dataloaders a partir dos CSVs de split."""
+    print("Usando splits de data/splits/ (source-based)")
+
+    train_records = _load_split_csv("train")
+    val_records = _load_split_csv("val")
+
+    # Descobre classes a partir dos dados
+    all_classes = sorted(set(cls for _, cls in train_records + val_records))
+    class_to_idx = {name: idx for idx, name in enumerate(all_classes)}
+
+    # Filtra arquivos que existem
+    train_samples = []
+    for path, cls in train_records:
+        if os.path.exists(path) and cls in class_to_idx:
+            train_samples.append((path, class_to_idx[cls]))
+
+    val_samples = []
+    for path, cls in val_records:
+        if os.path.exists(path) and cls in class_to_idx:
+            val_samples.append((path, class_to_idx[cls]))
+
+    print(f"\nSplit: {len(train_samples)} treino, {len(val_samples)} validação (source-based)")
+    for cls in all_classes:
+        idx = class_to_idx[cls]
+        t = sum(1 for _, c in train_samples if c == idx)
+        v = sum(1 for _, c in val_samples if c == idx)
+        print(f"  {cls}: train={t}, val={v}")
+
+    train_dataset = _ListDataset(train_samples, train_transform)
+    val_dataset = _ListDataset(val_samples, val_transform)
+
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=num_workers, pin_memory=True,
+        persistent_workers=num_workers > 0,
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False,
+        num_workers=num_workers, pin_memory=True,
+        persistent_workers=num_workers > 0,
+    )
+
+    return train_loader, val_loader, all_classes
+
+
+def get_class_weights() -> torch.Tensor | None:
+    """Retorna tensor de class weights para CrossEntropyLoss, ou None se não disponível."""
+    if not _splits_available():
+        return None
+
+    weights_dict = _load_class_weights()
+    # Ordena pela mesma ordem das classes
+    train_records = _load_split_csv("train")
+    all_classes = sorted(set(cls for _, cls in train_records))
+
+    weights = [weights_dict.get(cls, 1.0) for cls in all_classes]
+    return torch.tensor(weights, dtype=torch.float32)
 
 
 def _stratified_split(labels: List[int], val_ratio: float, seed: int) -> Tuple[List[int], List[int]]:

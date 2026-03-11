@@ -14,7 +14,7 @@ import torch
 import torch.nn as nn
 from torchvision import models
 
-from prepare import evaluate, get_dataloaders, get_device
+from prepare import evaluate, get_class_weights, get_dataloaders, get_device
 
 # =============================================================================
 # ██  HYPERPARAMETERS — O agente autônomo modifica APENAS esta seção  ██
@@ -226,7 +226,14 @@ def train():
     # Optimizer, scheduler, loss
     optimizer = build_optimizer(model)
     scheduler = build_scheduler(optimizer, len(train_loader))
-    criterion = nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING)
+
+    class_weights = get_class_weights()
+    if class_weights is not None:
+        class_weights = class_weights.to(device)
+        print(f"Class weights: {class_weights.tolist()}")
+    criterion = nn.CrossEntropyLoss(
+        weight=class_weights, label_smoothing=LABEL_SMOOTHING
+    )
 
     # Treina com budget de tempo
     start_time = time.time()
