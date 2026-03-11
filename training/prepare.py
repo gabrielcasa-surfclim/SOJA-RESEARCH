@@ -65,8 +65,11 @@ FOLDER_TO_CLASS = {
     "srin_viruses": "Mosaico",
 }
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "images")
-SPLITS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "splits")
+_DATA_ROOT = os.path.dirname(os.path.dirname(__file__))
+_SEGMENTED_DIR = os.path.join(_DATA_ROOT, "data", "images_segmented")
+_ORIGINAL_DIR = os.path.join(_DATA_ROOT, "data", "images")
+DATA_DIR = _SEGMENTED_DIR if os.path.isdir(_SEGMENTED_DIR) else _ORIGINAL_DIR
+SPLITS_DIR = os.path.join(_DATA_ROOT, "data", "splits")
 
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
 
