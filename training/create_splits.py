@@ -37,6 +37,7 @@ VAL_RATIO = 0.2
 
 # Fontes consideradas "externas" (holdout) — nunca entram no treino
 HOLDOUT_SOURCES = {"doencasdeplantas", "srin"}
+HOLDOUT_TRAIN_RATIO = 0.5  # 50% das imagens externas vão pro treino
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -81,8 +82,10 @@ def scan_all_images():
 
 
 def separate_holdout(records):
-    """Separa holdout externo (doencasdeplantas + srin) do resto.
-    Retorna (remaining, holdout) filtrados por classes ativas."""
+    """Separa imagens externas (doencasdeplantas + srin) em 50% treino / 50% holdout.
+    Split estratificado por classe. Retorna (remaining, holdout, classes)."""
+    rng = np.random.RandomState(SEED)
+
     class_records = defaultdict(list)
     for rec in records:
         class_records[rec[1]].append(rec)
@@ -92,13 +95,33 @@ def separate_holdout(records):
 
     holdout = []
     remaining = []
+    external_to_train = []
+
+    # Separa imagens externas por classe para split estratificado
+    external_by_class = defaultdict(list)
     for rec in records:
         if rec[1] not in active_classes:
             continue
         if rec[2] in HOLDOUT_SOURCES:
-            holdout.append(rec)
+            external_by_class[rec[1]].append(rec)
         else:
             remaining.append(rec)
+
+    # Split 50/50 estratificado por classe
+    for cls in sorted(external_by_class.keys()):
+        recs = list(external_by_class[cls])
+        rng.shuffle(recs)
+        n_train = max(1, int(len(recs) * HOLDOUT_TRAIN_RATIO))
+        external_to_train.extend(recs[:n_train])
+        holdout.extend(recs[n_train:])
+
+    # Imagens externas pro treino vão junto com remaining
+    remaining.extend(external_to_train)
+
+    total_ext = len(external_to_train) + len(holdout)
+    print(f"\n  Imagens externas: {total_ext} total")
+    print(f"    → treino:  {len(external_to_train)} ({HOLDOUT_TRAIN_RATIO*100:.0f}%)")
+    print(f"    → holdout: {len(holdout)} ({(1-HOLDOUT_TRAIN_RATIO)*100:.0f}%)")
 
     return remaining, holdout, sorted(active_classes)
 
@@ -182,8 +205,8 @@ def _folder_group_key(folder_name: str) -> str:
 
 def split_group_folder(remaining):
     """Agrupa pastas _crop/non-_crop como par único, divide 80/20 DENTRO
-    de cada grupo. Pastas de fontes diferentes ficam em grupos separados
-    e vão inteiras pro val (isolamento de fonte)."""
+    de cada grupo. Todas as fontes são misturadas — cross-source testing
+    é feito pelo holdout externo, não pelo val."""
     rng = np.random.RandomState(SEED)
 
     by_class = defaultdict(list)
@@ -200,41 +223,13 @@ def split_group_folder(remaining):
             group = _folder_group_key(rec[3])
             by_group[group].append(rec)
 
-        groups = sorted(by_group.keys())
-
-        if len(groups) > 1:
-            # Multi-grupo: fontes diferentes vão inteiras pro val (~20%)
-            # Dentro de cada grupo de mesma fonte, divide 80/20 por imagem
-            group_sources = {}
-            for g in groups:
-                group_sources[g] = set(r[2] for r in by_group[g])
-
-            # Identifica a fonte principal (mais imagens)
-            source_counts = defaultdict(int)
-            for g in groups:
-                for src in group_sources[g]:
-                    source_counts[src] += len([r for r in by_group[g] if r[2] == src])
-            main_source = max(source_counts, key=lambda s: source_counts[s])
-
-            for g in groups:
-                g_recs = by_group[g]
-                g_sources = group_sources[g]
-
-                if g_sources != {main_source} and len(groups) > 2:
-                    # Grupo de fonte diferente → inteiro pro val
-                    val.extend(g_recs)
-                else:
-                    # Mesma fonte → divide 80/20 dentro do grupo
-                    rng.shuffle(g_recs)
-                    n_val = max(1, int(len(g_recs) * VAL_RATIO))
-                    val.extend(g_recs[:n_val])
-                    train.extend(g_recs[n_val:])
-        else:
-            # Mono-grupo: random 20%
-            rng.shuffle(recs)
-            n_val = max(1, int(len(recs) * VAL_RATIO))
-            val.extend(recs[:n_val])
-            train.extend(recs[n_val:])
+        # Divide 80/20 dentro de cada grupo
+        for g in sorted(by_group.keys()):
+            g_recs = list(by_group[g])
+            rng.shuffle(g_recs)
+            n_val = max(1, int(len(g_recs) * VAL_RATIO))
+            val.extend(g_recs[:n_val])
+            train.extend(g_recs[n_val:])
 
     return train, val
 
