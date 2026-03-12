@@ -10,6 +10,7 @@ import os
 import time
 from datetime import datetime
 
+import timm
 import torch
 import torch.nn as nn
 from torchvision import models
@@ -20,7 +21,7 @@ from prepare import evaluate, get_class_weights, get_dataloaders, get_device
 # ██  HYPERPARAMETERS — O agente autônomo modifica APENAS esta seção  ██
 # =============================================================================
 
-MODEL = "efficientnet_b0"           # efficientnet_b0 | efficientnet_b1 | mobilenet_v3_small | mobilenet_v3_large | resnet18 | resnet34
+MODEL = "efficientnet_b0"           # efficientnet_b0 | efficientnet_b1 | convnext_base | maxvit_tiny_tf_224 | mobilenet_v3_small | mobilenet_v3_large | resnet18 | resnet34
 LEARNING_RATE = 0.0003              # 0.0001 — 0.01
 BATCH_SIZE = 32                     # 8 | 16 | 32
 EPOCHS = 3                          # será limitado pelo budget de tempo
@@ -91,7 +92,10 @@ def build_model(model_name: str, num_classes: int, dropout: float) -> nn.Module:
         )
 
     else:
-        raise ValueError(f"Modelo desconhecido: {model_name}")
+        # Fallback: usa timm pra qualquer modelo suportado
+        model = timm.create_model(model_name, pretrained=True, num_classes=num_classes, drop_rate=dropout)
+        model._timm = True  # marca pra freeze_backbone saber
+        return model
 
     return model
 
@@ -102,7 +106,11 @@ def freeze_backbone(model: nn.Module, model_name: str):
         param.requires_grad = False
 
     # Descongela o head
-    if model_name.startswith("efficientnet"):
+    if getattr(model, "_timm", False):
+        head = model.get_classifier()
+        for param in head.parameters():
+            param.requires_grad = True
+    elif model_name.startswith("efficientnet"):
         for param in model.classifier.parameters():
             param.requires_grad = True
     elif model_name.startswith("mobilenet"):
@@ -324,6 +332,35 @@ def train():
     # Loga resultado
     log_result(metrics, total_time, epochs_completed)
     print(f"Resultado logado em {RESULTS_FILE}")
+
+    # Avalia holdout se existir
+    holdout_csv = os.path.join(os.path.dirname(__file__), "..", "data", "splits", "holdout.csv")
+    if os.path.exists(holdout_csv):
+        print("\n" + "=" * 50)
+        print("  AVALIAÇÃO NO HOLDOUT EXTERNO")
+        print("=" * 50)
+        from prepare import _load_split_csv, _ListDataset, DATA_DIR
+        from torchvision import transforms
+        holdout_records = _load_split_csv("holdout")
+        if holdout_records:
+            class_to_idx = {name: i for i, name in enumerate(class_names)}
+            holdout_samples = []
+            data_root = os.path.join(os.path.dirname(__file__), "..")
+            for path, cls in holdout_records:
+                if cls in class_to_idx:
+                    full_path = os.path.join(data_root, path)
+                    holdout_samples.append((full_path, class_to_idx[cls]))
+            val_transform = transforms.Compose([
+                transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+            ])
+            holdout_ds = _ListDataset(holdout_samples, val_transform)
+            holdout_loader = torch.utils.data.DataLoader(holdout_ds, batch_size=BATCH_SIZE, shuffle=False)
+            holdout_metrics = evaluate(model, holdout_loader, device, class_names)
+            print(f"\n  Holdout: {holdout_metrics['accuracy']*100:.1f}% ({len(holdout_samples)} imagens)")
+        else:
+            print("  Holdout CSV vazio.")
 
     return metrics
 

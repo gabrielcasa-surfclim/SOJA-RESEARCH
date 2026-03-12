@@ -1,0 +1,4 @@
+model,params_m,val_accuracy,val_f1,holdout_accuracy,holdout_f1,epochs,time_s,batch_size
+efficientnet_b0,5.3,0.9720,0.9650,0.6380,,3,300,32
+convnext_base,87.6,0.9479,0.9218,0.5690,0.5669,0,481,16
+maxvit_tiny_tf_224,30.4,0.9566,0.9456,0.5000,0.4773,1,481,16

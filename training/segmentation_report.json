@@ -1,0 +1,172 @@
+{
+  "total_images": 10443,
+  "categories": {
+    "identical": 1364,
+    "significant_change": 1886,
+    "minor_change": 5301,
+    "bg_removed": 1892
+  },
+  "source_summary": {
+    "asdid": {
+      "total": 4248,
+      "categories": {
+        "significant_change": 1219,
+        "minor_change": 1301,
+        "bg_removed": 856,
+        "identical": 872
+      },
+      "avg_pixel_diff": 17.94,
+      "avg_pct_bg_removed": 7.56,
+      "avg_pct_changed": 21.07,
+      "cropped_count": 230
+    },
+    "digipathos": {
+      "total": 5083,
+      "categories": {
+        "identical": 478,
+        "significant_change": 628,
+        "minor_change": 3944,
+        "bg_removed": 33
+      },
+      "avg_pixel_diff": 1.83,
+      "avg_pct_bg_removed": 0.26,
+      "avg_pct_changed": 5.63,
+      "cropped_count": 4
+    },
+    "doencasdeplantas": {
+      "total": 80,
+      "categories": {
+        "significant_change": 32,
+        "minor_change": 38,
+        "identical": 5,
+        "bg_removed": 5
+      },
+      "avg_pixel_diff": 5.69,
+      "avg_pct_bg_removed": 1.59,
+      "avg_pct_changed": 15.62,
+      "cropped_count": 1
+    },
+    "plantvillage": {
+      "total": 1000,
+      "categories": {
+        "bg_removed": 994,
+        "minor_change": 6
+      },
+      "avg_pixel_diff": 62.15,
+      "avg_pct_bg_removed": 32.33,
+      "avg_pct_changed": 39.69,
+      "cropped_count": 58
+    },
+    "srin": {
+      "total": 32,
+      "categories": {
+        "identical": 9,
+        "significant_change": 7,
+        "minor_change": 12,
+        "bg_removed": 4
+      },
+      "avg_pixel_diff": 4.13,
+      "avg_pct_bg_removed": 1.62,
+      "avg_pct_changed": 9.64,
+      "cropped_count": 0
+    }
+  },
+  "class_summary": {
+    "Ferrugem": {
+      "total": 3976,
+      "categories": {
+        "identical": 260,
+        "significant_change": 1143,
+        "minor_change": 2325,
+        "bg_removed": 248
+      },
+      "avg_pixel_diff": 6.14,
+      "avg_pct_bg_removed": 2.15
+    },
+    "Mancha-alvo": {
+      "total": 2127,
+      "categories": {
+        "identical": 294,
+        "minor_change": 1055,
+        "significant_change": 328,
+        "bg_removed": 450
+      },
+      "avg_pixel_diff": 18.72,
+      "avg_pct_bg_removed": 8.1
+    },
+    "Mosaico": {
+      "total": 346,
+      "categories": {
+        "identical": 40,
+        "minor_change": 284,
+        "significant_change": 17,
+        "bg_removed": 5
+      },
+      "avg_pixel_diff": 1.75,
+      "avg_pct_bg_removed": 0.28
+    },
+    "Olho-de-rã": {
+      "total": 1586,
+      "categories": {
+        "bg_removed": 188,
+        "significant_change": 347,
+        "minor_change": 569,
+        "identical": 482
+      },
+      "avg_pixel_diff": 12.15,
+      "avg_pct_bg_removed": 4.77
+    },
+    "Oídio": {
+      "total": 1399,
+      "categories": {
+        "identical": 281,
+        "significant_change": 51,
+        "minor_change": 1060,
+        "bg_removed": 7
+      },
+      "avg_pixel_diff": 1.42,
+      "avg_pct_bg_removed": 0.13
+    },
+    "Saudável": {
+      "total": 1009,
+      "categories": {
+        "identical": 7,
+        "minor_change": 8,
+        "bg_removed": 994
+      },
+      "avg_pixel_diff": 61.62,
+      "avg_pct_bg_removed": 32.04
+    }
+  },
+  "holdout_categories": {
+    "minor_change": 26,
+    "significant_change": 21,
+    "bg_removed": 4,
+    "identical": 7
+  },
+  "scenarios": {
+    "A": {
+      "name": "A: Original (sem segmentação)",
+      "total": 10443
+    },
+    "B": {
+      "name": "B: Segmentado completo",
+      "total": 10443
+    },
+    "C": {
+      "name": "C: Seletivo (segmentado só onde removeu fundo)",
+      "segmented": 3778,
+      "original": 6665,
+      "total": 10443
+    }
+  },
+  "recommendation": {
+    "scenario": "C",
+    "reason": "Segmentação efetiva em 18.1% das imagens (63.8% sem mudança). Usar cenário seletivo (Cenário C) para maximizar benefício.",
+    "empirical": {
+      "original_holdout": 67.2,
+      "segmented_holdout": 70.7,
+      "improvement_pp": 3.5
+    }
+  }
+}
