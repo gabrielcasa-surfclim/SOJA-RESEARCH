@@ -1,0 +1,4 @@
+experiment_id,phase,description,val_acc,holdout_acc,holdout_f1,ferrugem,mancha_alvo,oidio,olho_de_ra,mosaico,config,timestamp
+B0,0,Baseline EfficientNet-B0 segmentado v2,0.9817,0.7069,0.6994,0.70,0.89,0.75,0.62,0.57,"lr=0.0005 dropout=0.1 onecycle light adamw wd=1e-4 ls=0.05 bs=32 img=224 ep=6",2026-03-11T19:33:00
+B1,1,RandAugment moderado (randaug_moderate),0.9778,0.6897,0.6627,0.50,0.89,0.81,0.62,0.57,lr=0.0005 dropout=0.1 onecycle randaug_moderate adamw wd=0.0001 ls=0.05 bs=32 img=224 ep=6,2026-03-11T23:07:58
+B2,1,RandAugment moderado (randaug_nocolor),0.9764,0.6552,0.6361,0.80,0.78,0.75,0.50,0.43,lr=0.0005 dropout=0.1 onecycle randaug_nocolor adamw wd=0.0001 ls=0.05 bs=32 img=224 ep=6,2026-03-11T23:24:52

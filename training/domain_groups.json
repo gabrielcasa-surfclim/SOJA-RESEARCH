@@ -1,0 +1,227 @@
+{
+  "domain_groups": {
+    "domain_clean": {
+      "description": "Imagens laboratoriais com fundo controlado, iluminação uniforme, resolução consistente",
+      "sources": [
+        "asdid",
+        "digipathos",
+        "plantvillage"
+      ],
+      "folders": [
+        "digipathos_cercospora",
+        "digipathos_cercospora_crop",
+        "digipathos_ferrugem",
+        "digipathos_ferrugem_crop",
+        "digipathos_mancha_alvo",
+        "digipathos_mancha_alvo_crop",
+        "digipathos_mosaico",
+        "digipathos_mosaico_crop",
+        "digipathos_oidio",
+        "digipathos_oidio_crop",
+        "digipathos_saudavel",
+        "frogeye",
+        "healthy",
+        "soybean_rust",
+        "target_spot"
+      ],
+      "total_images": 10331
+    },
+    "domain_varied": {
+      "description": "Imagens de campo ou com variação natural de iluminação, resolução e fundo",
+      "sources": [
+        "doencasdeplantas",
+        "srin"
+      ],
+      "folders": [
+        "doencasdeplantas_cercosporiose",
+        "doencasdeplantas_ferrugem_asiatica",
+        "doencasdeplantas_mancha_alvo",
+        "doencasdeplantas_mancha_olho_de_ra",
+        "doencasdeplantas_oidio",
+        "srin_cercospora_leaf_blight",
+        "srin_frogeye_leaf_spot",
+        "srin_powdery_mildew",
+        "srin_viruses"
+      ],
+      "total_images": 54
+    }
+  },
+  "source_details": {
+    "asdid": {
+      "count": 4248,
+      "classes": {
+        "Ferrugem": 1627,
+        "Mancha-alvo": 1081,
+        "Olho-de-rã": 1540
+      },
+      "n_folders": 3,
+      "avg_width": 5058,
+      "avg_height": 3473,
+      "std_width": 670.3,
+      "std_height": 313.2,
+      "min_res": "377x306",
+      "max_res": "5472x5472",
+      "avg_brightness": 125.4,
+      "std_brightness": 22.7,
+      "avg_sharpness": 1159.1,
+      "std_sharpness": 1594.2,
+      "avg_pct_bg": 7.53,
+      "std_pct_bg": 16.16,
+      "domain_scores": {
+        "brightness_std": 22.7,
+        "sharpness_std": 1594.2,
+        "resolution_std": 983.5,
+        "avg_bg_removed": 7.53
+      },
+      "domain": "domain_clean",
+      "folders": [
+        "frogeye",
+        "soybean_rust",
+        "target_spot"
+      ]
+    },
+    "digipathos": {
+      "count": 5083,
+      "classes": {
+        "Ferrugem": 2330,
+        "Mancha-alvo": 1028,
+        "Mosaico": 333,
+        "Olho-de-rã": 15,
+        "Oídio": 1368,
+        "Saudável": 9
+      },
+      "n_folders": 11,
+      "avg_width": 320,
+      "avg_height": 301,
+      "std_width": 772.7,
+      "std_height": 715.8,
+      "min_res": "8x12",
+      "max_res": "4128x4128",
+      "avg_brightness": 110.4,
+      "std_brightness": 20.2,
+      "avg_sharpness": 370.7,
+      "std_sharpness": 640.5,
+      "avg_pct_bg": 0.26,
+      "std_pct_bg": 1.85,
+      "domain_scores": {
+        "brightness_std": 20.2,
+        "sharpness_std": 640.5,
+        "resolution_std": 1488.5,
+        "avg_bg_removed": 0.26
+      },
+      "domain": "domain_clean",
+      "folders": [
+        "digipathos_cercospora",
+        "digipathos_cercospora_crop",
+        "digipathos_ferrugem",
+        "digipathos_ferrugem_crop",
+        "digipathos_mancha_alvo",
+        "digipathos_mancha_alvo_crop",
+        "digipathos_mosaico",
+        "digipathos_mosaico_crop",
+        "digipathos_oidio",
+        "digipathos_oidio_crop",
+        "digipathos_saudavel"
+      ]
+    },
+    "doencasdeplantas": {
+      "count": 40,
+      "classes": {
+        "Ferrugem": 9,
+        "Mancha-alvo": 9,
+        "Olho-de-rã": 8,
+        "Oídio": 14
+      },
+      "n_folders": 5,
+      "avg_width": 2678,
+      "avg_height": 1869,
+      "std_width": 1163.4,
+      "std_height": 743.7,
+      "min_res": "389x469",
+      "max_res": "4080x4080",
+      "avg_brightness": 135.3,
+      "std_brightness": 17.7,
+      "avg_sharpness": 2191.1,
+      "std_sharpness": 2343.6,
+      "avg_pct_bg": 1.77,
+      "std_pct_bg": 5.39,
+      "domain_scores": {
+        "brightness_std": 17.7,
+        "sharpness_std": 2343.6,
+        "resolution_std": 1907.1,
+        "avg_bg_removed": 1.77
+      },
+      "domain": "domain_varied",
+      "folders": [
+        "doencasdeplantas_cercosporiose",
+        "doencasdeplantas_ferrugem_asiatica",
+        "doencasdeplantas_mancha_alvo",
+        "doencasdeplantas_mancha_olho_de_ra",
+        "doencasdeplantas_oidio"
+      ]
+    },
+    "plantvillage": {
+      "count": 1000,
+      "classes": {
+        "Saudável": 1000
+      },
+      "n_folders": 1,
+      "avg_width": 256,
+      "avg_height": 256,
+      "std_width": 0.0,
+      "std_height": 0.0,
+      "min_res": "256x256",
+      "max_res": "256x256",
+      "avg_brightness": 147.7,
+      "std_brightness": 16.1,
+      "avg_sharpness": 6001.3,
+      "std_sharpness": 3549.1,
+      "avg_pct_bg": 32.33,
+      "std_pct_bg": 8.39,
+      "domain_scores": {
+        "brightness_std": 16.1,
+        "sharpness_std": 3549.1,
+        "resolution_std": 0.0,
+        "avg_bg_removed": 32.33
+      },
+      "domain": "domain_clean",
+      "folders": [
+        "healthy"
+      ]
+    },
+    "srin": {
+      "count": 14,
+      "classes": {
+        "Mosaico": 6,
+        "Olho-de-rã": 7,
+        "Oídio": 1
+      },
+      "n_folders": 4,
+      "avg_width": 1300,
+      "avg_height": 994,
+      "std_width": 0.0,
+      "std_height": 230.3,
+      "min_res": "1300x864",
+      "max_res": "1300x1734",
+      "avg_brightness": 127.9,
+      "std_brightness": 10.2,
+      "avg_sharpness": 766.5,
+      "std_sharpness": 961.3,
+      "avg_pct_bg": 0.59,
+      "std_pct_bg": 2.07,
+      "domain_scores": {
+        "brightness_std": 10.2,
+        "sharpness_std": 961.3,
+        "resolution_std": 230.3,
+        "avg_bg_removed": 0.59
+      },
+      "domain": "domain_varied",
+      "folders": [
+        "srin_cercospora_leaf_blight",
+        "srin_frogeye_leaf_spot",
+        "srin_powdery_mildew",
+        "srin_viruses"
+      ]
+    }
+  }
+}

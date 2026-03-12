@@ -174,6 +174,22 @@ def get_train_transform(image_size: int = 224, augmentation_level: str = "medium
             transforms.RandomRotation(45),
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         ]
+    elif augmentation_level == "randaug_moderate":
+        aug = [
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(p=0.2),
+            transforms.RandomRotation(15),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.15, hue=0.03),
+            transforms.RandomApply([transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0))], p=0.1),
+        ]
+    elif augmentation_level == "randaug_nocolor":
+        aug = [
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(p=0.2),
+            transforms.RandomRotation(15),
+            transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0, hue=0),
+            transforms.RandomApply([transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0))], p=0.15),
+        ]
     elif augmentation_level == "heavy":
         aug = [
             transforms.RandomHorizontalFlip(),
@@ -191,7 +207,9 @@ def get_train_transform(image_size: int = 224, augmentation_level: str = "medium
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ]
 
-    if augmentation_level == "heavy":
+    if augmentation_level in ("randaug_moderate", "randaug_nocolor"):
+        post.append(transforms.RandomErasing(p=0.1, scale=(0.02, 0.10)))
+    elif augmentation_level == "heavy":
         post.append(transforms.RandomErasing(p=0.2, scale=(0.02, 0.15)))
 
     return transforms.Compose(base + aug + post)

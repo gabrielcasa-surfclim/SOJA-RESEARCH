@@ -1,0 +1,62 @@
+{
+  "locked_at": "2026-03-11",
+  "phase": "0 — Baseline congelado",
+  "backbone": "efficientnet_b0",
+  "checkpoint": "training/best_model_production.pth",
+  "params_m": 4.015,
+  "seed": 42,
+  "image_scenario": "segmented_selective_v2",
+  "image_scenario_description": "Hull+GrabCut segmentation where background was removed (18.1% of images), original elsewhere",
+  "splits": {
+    "train_csv": "data/splits/train.csv",
+    "val_csv": "data/splits/val.csv",
+    "holdout_csv": "data/splits/holdout.csv",
+    "train_size": 8312,
+    "val_size": 2073,
+    "holdout_size": 58
+  },
+  "config": {
+    "lr": 0.0005,
+    "dropout": 0.1,
+    "optimizer": "adamw",
+    "scheduler": "onecycle",
+    "augmentation": "light",
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.05,
+    "batch_size": 32,
+    "image_size": 224,
+    "epochs_completed": 6,
+    "budget_seconds": 900,
+    "freeze_backbone": false
+  },
+  "classes": ["Ferrugem", "Mancha-alvo", "Mosaico", "Olho-de-rã", "Oídio", "Saudável"],
+  "metrics": {
+    "val_accuracy": 0.9817,
+    "val_f1": 0.9774,
+    "holdout_accuracy": 0.7069,
+    "holdout_f1": 0.6994,
+    "holdout_precision": 0.7140,
+    "holdout_recall": 0.7071
+  },
+  "holdout_per_class": {
+    "Ferrugem": {"correct": 7, "total": 10, "accuracy": 0.70},
+    "Mancha-alvo": {"correct": 8, "total": 9, "accuracy": 0.89},
+    "Mosaico": {"correct": 4, "total": 7, "accuracy": 0.57},
+    "Olho-de-rã": {"correct": 10, "total": 16, "accuracy": 0.62},
+    "Oídio": {"correct": 12, "total": 16, "accuracy": 0.75}
+  },
+  "holdout_per_source": {
+    "doencasdeplantas": {"correct": 28, "total": 40, "accuracy": 0.70},
+    "srin": {"correct": 13, "total": 18, "accuracy": 0.72}
+  },
+  "confusion_matrix": {
+    "labels": ["Ferrugem", "Mancha-alvo", "Mosaico", "Olho-de-rã", "Oídio"],
+    "matrix": [
+      [7, 3, 0, 0, 0],
+      [1, 8, 0, 0, 0],
+      [0, 0, 4, 3, 0],
+      [3, 1, 0, 10, 2],
+      [1, 1, 1, 1, 12]
+    ]
+  }
+}
